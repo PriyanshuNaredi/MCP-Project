@@ -1,0 +1,11 @@
+LLM Provider Failover and Fallback Strategies
+
+Applications that depend on a single large language model provider are vulnerable to outages, rate limiting, and latency spikes from that provider. A common mitigation strategy is to implement a fallback chain across multiple LLM providers, so that if the primary provider fails or times out, the request is automatically retried against a secondary provider without the end user noticing any disruption.
+
+A basic failover implementation wraps each provider call in a try-except block. If the primary provider raises an exception such as a timeout, rate limit error, or server error, the exception is caught and the same request is sent to the fallback provider instead. This pattern is sometimes called a circuit breaker when it also tracks repeated failures over time and temporarily stops sending requests to a provider that has failed multiple times in a row, only retrying it after a cooldown period.
+
+When choosing providers for a fallback chain, developers often pick one provider as primary based on cost, speed, or quality for the use case, and a second provider as backup that has a different underlying infrastructure, so that an outage affecting the primary provider is unlikely to affect the backup at the same time. For example, an application might use Google's Gemini API as the primary provider because of its generous free tier, and fall back to OpenAI's API if Gemini becomes unavailable.
+
+Latency is another consideration in failover design. A well-designed system sets a reasonable timeout for the primary provider, for example five seconds, so that a slow response does not block the user indefinitely. If the timeout is exceeded, the system should cancel the pending request and immediately attempt the fallback rather than waiting for the original request to eventually complete.
+
+To measure the effectiveness of a failover system, teams commonly track uptime percentage, defined as the fraction of requests that received a successful response from either the primary or fallback provider, and time-to-first-token, which measures how quickly the first piece of a streamed response reaches the user. A system that maintains high uptime even when one provider is fully down demonstrates that the fallback logic is working correctly.

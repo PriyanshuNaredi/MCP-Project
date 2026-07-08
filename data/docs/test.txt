@@ -1,0 +1,1 @@
+﻿This is a test document about retrieval-augmented generation. RAG combines a retriever with a language model to ground answers in external documents.

@@ -1,0 +1,11 @@
+Retrieval-Augmented Generation (RAG)
+
+Retrieval-Augmented Generation is a technique that combines a retrieval system with a language model to produce answers grounded in external documents rather than relying solely on the model's parametric knowledge. The core idea is to first search a knowledge base for relevant passages, then pass those passages as context to the language model along with the original query.
+
+A typical RAG pipeline has three stages. First, documents are ingested: text is split into chunks, each chunk is converted into a numerical vector using an embedding model, and those vectors are stored in a vector database such as ChromaDB, FAISS, or Pinecone. Second, at query time, the user's question is embedded using the same model, and the vector database returns the top-k most similar chunks based on cosine similarity or another distance metric. Third, the retrieved chunks are inserted into a prompt template alongside the original question, and the language model generates an answer using that context.
+
+RAG addresses two common problems with large language models: hallucination and knowledge cutoff. Because the model is given actual source text instead of relying on memorized facts, it is less likely to fabricate information. It also allows the system to answer questions about recent or private information not included in the model's training data, without needing to retrain the model itself.
+
+Common design choices in a RAG system include chunk size (how much text goes into each vector), overlap between chunks (to avoid splitting sentences awkwardly at boundaries), the number of retrieved chunks (k), and whether to apply reranking after retrieval to improve precision. Simple RAG systems use a single retrieval pass with a fixed k value, while more advanced systems use techniques such as hybrid search (combining keyword and vector search), query rewriting, or multi-hop retrieval for complex questions.
+
+RAG is distinct from fine-tuning. Fine-tuning updates the model's internal weights to bake in new knowledge or behavior, which is expensive and static. RAG instead keeps the model frozen and dynamically supplies relevant information at inference time, making it cheaper to update (just re-index new documents) and more transparent (you can inspect exactly which source text informed an answer).
